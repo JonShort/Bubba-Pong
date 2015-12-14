@@ -1,0 +1,22 @@
+<html>
+<head>
+	<style type="text/css">
+		body {
+			padding: 0;
+			margin: 0;
+		}
+	</style>
+</head>
+<body>
+	<canvas id="game_canvas"></canvas>
+	<script src="fabric.min.js"></script>
+	<script src="pingpong.js"></script>
+	<script>
+		var game = new PingPongGame();
+		game.start({
+			width: document.documentElement.clientWidth,
+			height: document.documentElement.clientHeight
+		});
+	</script>
+</body>
+</html>

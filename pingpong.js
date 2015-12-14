@@ -80,10 +80,14 @@ function PingPongGame(options) {
 		// Update coordinates for Collision Detection
 		exports.player.setCoords();
 		exports.gameBall.setCoords();
+		exports.bubba.setCoords();
 
 		if (exports.gameBall.isInPlay) {
 			exports.gameBall.updatePosition(exports.canvas.width, exports.canvas.height, exports.player);
+			
 		}
+
+		exports.bubba.updatePosition();
 
 		exports.canvas.renderAll();
 		requestAnimationFrame(function() {
@@ -193,23 +197,34 @@ function PingPongGame(options) {
 		exports.canvas.add(exports.player);
 
 		
-		//exports.player = new bat(exports.canvas.width / 2, playerBounds);
 		exports.gameBall = new ball(0, 0, exports.canvas.width, exports.canvas.height);
 
 	
-
-
-
-		fabric.Image.fromURL("bubba-with-bat.png", function(img) {
-			img.set({
-				left: 200,
-				top: (exports.canvas.height * 0.15) - 85
-			});
-
-			img.scale(0.5);
-
-			exports.canvas.add(img);
+		exports.bubba = getAsset("bubba-with-bat.png");
+		exports.bubba.set({
+			left: 200,
+			top: (exports.canvas.height * 0.15) - 85
 		});
+		exports.bubba.scale(0.5);
+		exports.bubba.updatePosition = function() {
+			var moveSpeed = 6;
+			if (exports.gameBall.left < (exports.bubba.left - moveSpeed)) {
+				exports.bubba.left = exports.bubba.left - moveSpeed;
+			} else if (exports.gameBall.left > (exports.bubba.left + moveSpeed)) {
+				exports.bubba.left = exports.bubba.left + moveSpeed;
+			}
+
+			// dont leave the table
+			var leftEdge = (exports.canvas.width * 0.1) + (exports.canvas.width * 0.1);
+			var rightEdge = (exports.canvas.width * 0.9) - (exports.canvas.width * 0.1);
+
+			if (exports.bubba.left < leftEdge) {
+				exports.bubba.left = leftEdge;
+			} else if (exports.bubba.left > (rightEdge - (exports.bubba.width * 0.5))) {
+				exports.bubba.left = (rightEdge - (exports.bubba.width * 0.5));
+			}
+		};
+		exports.canvas.add(exports.bubba);
 
 		
 

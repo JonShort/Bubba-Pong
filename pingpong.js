@@ -1,13 +1,6 @@
 function PingPongGame(options) {
 	var exports = this;
 
-	var Direction = {
-		Left: 1,
-		Right: 2,
-		Up: 3,
-		Down: 4
-	};
-
 	var bat = fabric.util.createClass(fabric.Rect, {
 		initialize: function(left, top) {
 			var _width = 60;
@@ -35,56 +28,26 @@ function PingPongGame(options) {
 
 			this.set("selectable", false);
 			this.setColor("red");
-			this.direction = Direction.Up;
 			this.isInPlay = false;
 
-			this.speed = 5;
-		},
-
-		invertDirection: function() {
-			switch(this.direction) {
-				case Direction.Right:
-					this.direction = Direction.Left;
-					break;
-				case Direction.Left:
-					this.direction = Direction.Right;
-					break;
-				case Direction.Up:
-					this.direction = Direction.Down;
-					break;
-				case Direction.Down:
-					this.direction = Direction.Up;
-					break;
-			}
+			this.deltaX = 5;
+			this.deltaY = 5;
 		},
 
 		updatePosition: function(maxLeft, maxTop) {
-			if (this.left > maxLeft) {
-				this.direction = Direction.Left;
-			} else if (this.left < 0) {
-				this.direction = Direction.Right;
+			if (this.left < 0 || this.left > maxLeft) {
+				this.deltaX = -this.deltaX;
+			}
+			if (this.top < 0 || this.top > maxTop) {
+				this.deltaY = -this.deltaY;
 			}
 
-			if (this.top > maxTop) {
-				this.direction = Direction.Up;
-			} else if (this.top < 0) {
-				this.direction = Direction.Down;
-			}
+			this.left += this.deltaX;
+			this.top += this.deltaY;
+		},
 
-			switch(this.direction) {
-				case Direction.Right:
-					this.left = this.left + this.speed;
-					break;
-				case Direction.Left:
-					this.left = this.left - this.speed;
-					break;
-				case Direction.Up:
-					this.top = this.top - this.speed;
-					break;
-				case Direction.Down:
-					this.top = this.top + this.speed;
-					break;
-			}
+		invertDirection: function() {
+			this.deltaY = -this.deltaY;
 		}
 	});
 

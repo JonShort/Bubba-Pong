@@ -18,13 +18,16 @@ function PingPongGame(options) {
 	});
 
 	var ball = fabric.util.createClass(fabric.Circle, {
-		initialize: function(left, top) {
-			var _radius = 15;
+		initialize: function(left, top, maxLeft, maxTop) {
 			this.callSuper("initialize", {
-				left: left - (_radius/2),
-		  		top: top - (_radius / 2),
-		  		radius: _radius
+				left: left,
+		  		top: top,
+		  		radius: this.getRadius(top, maxTop)
 			});
+
+			this.radius = this.getRadius(this.top, maxTop);
+
+			this.hitProcessed = false;
 
 			this.set("selectable", false);
 			this.setColor("red");
@@ -34,7 +37,22 @@ function PingPongGame(options) {
 			this.deltaY = 5;
 		},
 
-		updatePosition: function(maxLeft, maxTop) {
+		getRadius: function(yPosition, maxYPosition) {
+			var _defaultRadius = 15;
+			var bonusRadius = ((yPosition / maxYPosition) * 100) / 15;
+			return _defaultRadius + bonusRadius;
+		},
+
+		updatePosition: function(maxLeft, maxTop, player) {
+			if (exports.gameBall.intersectsWithObject(player)) {
+				if (!this.hitProcessed) {
+					exports.gameBall.invertDirection();
+				}
+				this.hitProcessed = true;
+			} else {
+				this.hitProcessed = false;
+			}
+
 			if (this.left < 0 || this.left > maxLeft) {
 				this.deltaX = -this.deltaX;
 			}
@@ -44,6 +62,8 @@ function PingPongGame(options) {
 
 			this.left += this.deltaX;
 			this.top += this.deltaY;
+
+			this.radius = this.getRadius(this.top, maxTop);
 		},
 
 		invertDirection: function() {
@@ -57,11 +77,7 @@ function PingPongGame(options) {
 		exports.gameBall.setCoords();
 
 		if (exports.gameBall.isInPlay) {
-			if (exports.gameBall.intersectsWithObject(exports.player)) {
-				exports.gameBall.invertDirection();
-			}
-
-			exports.gameBall.updatePosition(exports.canvas.width, exports.canvas.height);
+			exports.gameBall.updatePosition(exports.canvas.width, exports.canvas.height, exports.player);
 		}
 
 		exports.canvas.renderAll();
@@ -74,7 +90,7 @@ function PingPongGame(options) {
 		var minPlayerY = exports.canvas.height * 0.75;
 		
 		exports.player = new bat(exports.canvas.width / 2, minPlayerY);
-		exports.gameBall = new ball(exports.player.left, exports.player.top);
+		exports.gameBall = new ball(exports.player.left, exports.player.top, exports.canvas.width, exports.canvas.height);
 
 		exports.canvas.on("mouse:move", function(args) {
 			exports.player.left = args.e.clientX - exports.player.width / 2;

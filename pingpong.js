@@ -1,6 +1,8 @@
 function PingPongGame(options) {
 	var exports = this;
 
+	var assetManager = new AssetManager();
+
 	var bat = fabric.util.createClass(fabric.Rect, {
 		initialize: function(left, top) {
 			var _width = 60;
@@ -169,7 +171,7 @@ function PingPongGame(options) {
 
 		var playerBounds = exports.canvas.height * 0.75;
 
-		exports.player = getAsset("bat.png");
+		exports.player = assetManager.getLoadedAsset("bat.png");
 
 		exports.player.set({
 			left: exports.canvas.width / 2,
@@ -200,14 +202,14 @@ function PingPongGame(options) {
 		exports.gameBall = new ball(0, 0, exports.canvas.width, exports.canvas.height);
 
 	
-		exports.bubba = getAsset("bubba-with-bat.png");
+		exports.bubba = assetManager.getLoadedAsset("bubba-with-bat.png");
 		exports.bubba.set({
 			left: 200,
 			top: (exports.canvas.height * 0.15) - 85
 		});
 		exports.bubba.scale(0.5);
 		exports.bubba.updatePosition = function() {
-			var moveSpeed = 6;
+			var moveSpeed = 10;
 			if (exports.gameBall.left < (exports.bubba.left - moveSpeed)) {
 				exports.bubba.left = exports.bubba.left - moveSpeed;
 			} else if (exports.gameBall.left > (exports.bubba.left + moveSpeed)) {
@@ -242,33 +244,33 @@ function PingPongGame(options) {
 		});
 	};
 
-	var _loadedAssets = [];
-	var _loadAssets = function(assetsNamesToLoad, successCallback) {
-		assetsNamesToLoad.forEach(function(assetName) {
-			fabric.Image.fromURL(assetName, function(asset) {
-				_loadedAssets.push({
-					assetName: assetName,
-					asset: asset
-				});
+	// var _loadedAssets = [];
+	// var _loadAssets = function(assetsNamesToLoad, successCallback) {
+	// 	assetsNamesToLoad.forEach(function(assetName) {
+	// 		fabric.Image.fromURL(assetName, function(asset) {
+	// 			_loadedAssets.push({
+	// 				assetName: assetName,
+	// 				asset: asset
+	// 			});
 
-				if (_loadedAssets.length === assetsNamesToLoad.length) {
-					successCallback();
-				}
-			});
-		});
-	};
+	// 			if (_loadedAssets.length === assetsNamesToLoad.length) {
+	// 				successCallback();
+	// 			}
+	// 		});
+	// 	});
+	// };
 
-	var getAsset = function(assetName) {
-		for (var i = 0; i < _loadedAssets.length; i++) {
-			if (_loadedAssets[i].assetName === assetName) {
-				return _loadedAssets[i].asset;
-			}
-		}
-		throw "Asset " + assetName + " not loaded.";
-	};
+	// var getAsset = function(assetName) {
+	// 	for (var i = 0; i < _loadedAssets.length; i++) {
+	// 		if (_loadedAssets[i].assetName === assetName) {
+	// 			return _loadedAssets[i].asset;
+	// 		}
+	// 	}
+	// 	throw "Asset " + assetName + " not loaded.";
+	// };
 
 	exports.start = function() {
-		_loadAssets(["bubba-with-bat.png", "bat.png"], function() {
+		assetManager.loadAssets(["bubba-with-bat.png", "bat.png"], function() {
 			requestAnimationFrame(function() {
 				_setInitialState();
 				_run();

@@ -12,11 +12,18 @@
 	<script src="fabric.min.js"></script>
 	<script src="pingpong.js"></script>
 	<script>
-		var game = new PingPongGame();
-		game.start({
+		var game = new PingPongGame({
 			width: document.documentElement.clientWidth,
 			height: document.documentElement.clientHeight
 		});
+		game.start();
+
+		window.onresize = function(event) {
+			game.resizeCanvas({
+				width: document.documentElement.clientWidth,
+				height: document.documentElement.clientHeight
+			});
+		};
 	</script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-function PingPongGame() {
+function PingPongGame(options) {
 	var exports = this;
 
 	var Direction = {
@@ -36,103 +36,127 @@ function PingPongGame() {
 			this.set("selectable", false);
 			this.setColor("red");
 			this.direction = Direction.Up;
-			this.isInPlay = true;
+			this.isInPlay = false;
+
+			this.speed = 5;
 		},
 
-		animate: function(environment) {
-			if (this.left > environment.width) {
+		invertDirection: function() {
+			switch(this.direction) {
+				case Direction.Right:
+					this.direction = Direction.Left;
+					break;
+				case Direction.Left:
+					this.direction = Direction.Right;
+					break;
+				case Direction.Up:
+					this.direction = Direction.Down;
+					break;
+				case Direction.Down:
+					this.direction = Direction.Up;
+					break;
+			}
+		},
+
+		updatePosition: function(maxLeft, maxTop) {
+			if (this.left > maxLeft) {
 				this.direction = Direction.Left;
 			} else if (this.left < 0) {
 				this.direction = Direction.Right;
 			}
 
+			if (this.top > maxTop) {
+				this.direction = Direction.Up;
+			} else if (this.top < 0) {
+				this.direction = Direction.Down;
+			}
+
 			switch(this.direction) {
 				case Direction.Right:
-					this.left++;
+					this.left = this.left + this.speed;
 					break;
 				case Direction.Left:
-					this.left--;
+					this.left = this.left - this.speed;
 					break;
 				case Direction.Up:
-					this.top--;
+					this.top = this.top - this.speed;
 					break;
 				case Direction.Down:
-					this.top++;
+					this.top = this.top + this.speed;
 					break;
 			}
 		}
 	});
 
-	var _initCanvas = function(width, height) {
-		var canvas = new fabric.Canvas("game_canvas");
-		canvas.selection = false;
+	var _run = function() {
+		// Update coordinates for Collision Detection
+		exports.player.setCoords();
+		exports.gameBall.setCoords();
 
-		canvas.defaultCursor = "none";
-
-		canvas.setDimensions({
-			width: width,
-			height: height
-		});
-
-		return canvas;
-	};
-
-	var _run = function(canvas) {
-		canvas.forEachObject(function(object) {
-			if (!object.animate) {
-				return;
+		if (exports.gameBall.isInPlay) {
+			if (exports.gameBall.intersectsWithObject(exports.player)) {
+				exports.gameBall.invertDirection();
 			}
-			object.animate({
-				width: canvas.getWidth(),
-				height: canvas.getHeight()
-			});
-		});
 
-		canvas.fire("x:after-animate");
+			exports.gameBall.updatePosition(exports.canvas.width, exports.canvas.height);
+		}
 
-		canvas.renderAll();
+		exports.canvas.renderAll();
 		requestAnimationFrame(function() {
-			_run(canvas);
+			_run();
 		});
 	};
 
-	var _setInitialState = function(canvas) {
-		var minPlayerY = canvas.height * 0.75;
-
+	var _setInitialState = function() {
+		var minPlayerY = exports.canvas.height * 0.75;
 		
-		var player = new bat(canvas.width / 2, minPlayerY);
+		exports.player = new bat(exports.canvas.width / 2, minPlayerY);
+		exports.gameBall = new ball(exports.player.left, exports.player.top);
 
-		canvas.on("mouse:move", function(options) {
-			player.left = options.e.clientX - player.width / 2;
-			player.top = options.e.clientY - player.height / 2;
+		exports.canvas.on("mouse:move", function(args) {
+			exports.player.left = args.e.clientX - exports.player.width / 2;
+			exports.player.top = args.e.clientY - exports.player.height / 2;
 
-			if (player.top < minPlayerY) {
-				player.top = minPlayerY;
+			if (exports.player.top < minPlayerY) {
+				exports.player.top = minPlayerY;
+			}
+
+			// Track Player when not in Play
+			if (!exports.gameBall.isInPlay) {
+				exports.gameBall.left = exports.player.left;
+				exports.gameBall.top = exports.player.top;
 			}
 		});
 
-		canvas.on("mouse:down", function(options) {
-			if (!(exports.gameBall && exports.gameBall.isInPlay)) {
-				exports.gameBall = new ball(options.e.clientX, options.e.clientY);
-				canvas.add(exports.gameBall);
-			}
+		exports.canvas.on("mouse:down", function(args) {
+			exports.gameBall.isInPlay = true;
 		});
-
-		canvas.on("x:after-animate", function() {
-			// if (exports.gameBall.intersectsWithObject(player)) {
-			// 	alert("boom");
-			// }
-		});
-
 		
-		canvas.add(player);
+		exports.canvas.add(exports.player);
+		exports.canvas.add(exports.gameBall);
 	};
 
-	exports.start = function(options) {
-		var canvas = _initCanvas(options.width, options.height);
+	exports.resizeCanvas = function(options) {
+		exports.canvas.setDimensions({
+			width: options.width,
+			height: options.height
+		});
+	};
+
+	exports.start = function() {
 		requestAnimationFrame(function() {
-			_setInitialState(canvas);
-			_run(canvas);
+			_setInitialState();
+			_run();
 		});
 	};
+
+	(function init(options) {
+		exports.canvas = new fabric.Canvas("game_canvas");
+		exports.canvas.selection = false;
+		exports.canvas.defaultCursor = "none";
+		exports.canvas.setDimensions({
+			width: options.width,
+			height: options.height
+		});
+	})(options);
 }

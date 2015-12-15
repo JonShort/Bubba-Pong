@@ -19,16 +19,16 @@ function PingPongGame(options) {
 		}
 	});
 
-	var table = fabric.util.createClass(fabric.Group, {
+	var pingPongTable = fabric.util.createClass(fabric.Group, {
 		initialize: function(args) {
 			this.callSuper("initialize");
 
-			var tableTop = args.canvasHeight * 0.15;
-			var tableBottom = args.canvasHeight * 0.9;
-			var tableLeft = args.canvasWidth * 0.1;
-			var tableRight = args.canvasWidth * 0.9;
+			var tableTop = args.height * 0.15;
+			var tableBottom = args.height * 0.9;
+			var tableLeft = args.width * 0.1;
+			var tableRight = args.width * 0.9;
 
-			var tableSkew = args.canvasWidth * 0.1;
+			var tableSkew = args.width * 0.1;
 
 			this.add(new fabric.Polygon([
 				{ x: tableLeft + tableSkew, y: tableTop },
@@ -172,21 +172,19 @@ function PingPongGame(options) {
 
 	var _setInitialState = function() {
 
-		var pingPongTable = new table({
-			canvasWidth: exports.canvas.width,
-			canvasHeight: exports.canvas.height
-		});
-		exports.canvas.add(pingPongTable);
+
+		exports.canvas.add(new pingPongTable({
+			width: exports.canvas.width,
+			height: exports.canvas.height
+		}));
 
 		var playerBounds = exports.canvas.height * 0.75;
 
 		exports.player = assetManager.getLoadedAsset("bat.png");
-
 		exports.player.set({
 			left: exports.canvas.width / 2,
 			top: playerBounds
 		});
-
 		exports.player.set("selectable", false);
 
 		exports.canvas.on("mouse:move", function(args) {
@@ -216,7 +214,7 @@ function PingPongGame(options) {
 			left: 200,
 			top: (exports.canvas.height * 0.15) - 85
 		});
-		exports.bubba.scale(0.5);
+		exports.bubba.set("selectable", false);
 		exports.bubba.updatePosition = function() {
 			var moveSpeed = 10;
 			if (exports.gameBall.left < (exports.bubba.left - moveSpeed)) {
@@ -231,8 +229,8 @@ function PingPongGame(options) {
 
 			if (exports.bubba.left < leftEdge) {
 				exports.bubba.left = leftEdge;
-			} else if (exports.bubba.left > (rightEdge - (exports.bubba.width * 0.5))) {
-				exports.bubba.left = (rightEdge - (exports.bubba.width * 0.5));
+			} else if (exports.bubba.left + exports.bubba.width > rightEdge) {
+				exports.bubba.left = rightEdge - exports.bubba.width;
 			}
 		};
 		exports.canvas.add(exports.bubba);

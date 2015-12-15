@@ -1,4 +1,4 @@
-pingPongTable = fabric.util.createClass(fabric.Group, {
+PingPongTable = fabric.util.createClass(fabric.Group, {
 	initialize: function(args) {
 		this.callSuper("initialize");
 

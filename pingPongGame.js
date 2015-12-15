@@ -11,29 +11,11 @@ function PingPongGame(options) {
 				left: args.canvasWidth - _width,
 		  		top: 0,
 		  		width: _width,
-		  		height: _height
+		  		height: _height,
+		  		selectable: false
 			});
 
-			this.set("selectable", false);
 			this.setColor("brown");
-		}
-	});
-
-	
-
-	var bat = fabric.util.createClass(fabric.Rect, {
-		initialize: function(left, top) {
-			var _width = 60;
-			var _height = 20;
-			this.callSuper("initialize", {
-				left: left - (_width/2),
-		  		top: top - (_height / 2),
-		  		width: _width,
-		  		height: _height
-			});
-
-			this.set("selectable", false);
-			this.setColor("pink");
 		}
 	});
 
@@ -42,14 +24,14 @@ function PingPongGame(options) {
 			this.callSuper("initialize", {
 				left: left,
 		  		top: top,
-		  		radius: this.getRadius(top, maxTop)
+		  		radius: this.getRadius(top, maxTop),
+		  		selectable: false
 			});
 
 			this.radius = this.getRadius(this.top, maxTop);
 
 			this.hitProcessed = false;
 
-			this.set("selectable", false);
 			this.setColor("orange");
 			this.isInPlay = false;
 
@@ -70,7 +52,8 @@ function PingPongGame(options) {
 		},
 
 		updatePosition: function(maxLeft, maxTop, player) {
-			if (exports.gameBall.intersectsWithObject(player)) {
+			if (player.hitTargetIntersectsWithObject(exports.gameBall)) {
+			//if (exports.gameBall.intersectsWithObject(player.hitTarget)) {
 				if (!this.hitProcessed) {
 					exports.gameBall.invertDirection();
 				}
@@ -104,13 +87,12 @@ function PingPongGame(options) {
 
 	var _run = function() {
 		// Update coordinates for Collision Detection
-		exports.player.setCoords();
-		exports.gameBall.setCoords();
-		exports.bubba.setCoords();
+		//exports.player.hitTarget.setCoords();
+		//exports.gameBall.setCoords();
+		//exports.bubba.setCoords();
 
 		if (exports.gameBall.isInPlay) {
 			exports.gameBall.updatePosition(exports.canvas.width, exports.canvas.height, exports.player);
-			
 		}
 
 		exports.bubba.updatePosition();
@@ -124,48 +106,35 @@ function PingPongGame(options) {
 	var _setInitialState = function() {
 
 
-		exports.canvas.add(new pingPongTable({
-			width: exports.canvas.width,
-			height: exports.canvas.height
-		}));
+		var theScoreBoard = new scoreBoard({ canvasWidth: exports.canvas.width });
+
+		
+		
 
 		var playerBounds = exports.canvas.height * 0.75;
 
-		exports.player = assetManager.getLoadedAsset("bat.png");
-		exports.player.set({
-			left: exports.canvas.width / 2,
-			top: playerBounds
-		});
-		exports.player.set("selectable", false);
-
-		exports.canvas.on("mouse:move", function(args) {
-			exports.player.left = args.e.clientX - exports.player.width / 2;
-			exports.player.top = args.e.clientY - exports.player.height / 2;
-
-			if (exports.player.top < playerBounds) {
-				exports.player.top = playerBounds;
-			}
-
-			// Track Player when not in Play
-			if (!exports.gameBall.isInPlay) {
-				exports.gameBall.left = exports.player.left;
-				exports.gameBall.top = exports.player.top;
-			}
+		var pingPongBatSprite = assetManager.getLoadedAsset("bat.png");
+		exports.player = new Player(pingPongBatSprite, {
+			initialLeft: exports.canvas.width / 2,
+			initialTop: playerBounds
 		});
 
-
-		exports.canvas.add(exports.player);
+		exports.gameBall = new ball(exports.player.left, exports.player.top, exports.canvas.width, exports.canvas.height);
 
 		
-		exports.gameBall = new ball(0, 0, exports.canvas.width, exports.canvas.height);
 
+
+		
+
+		
+		
 	
 		exports.bubba = assetManager.getLoadedAsset("bubba-with-bat.png");
 		exports.bubba.set({
 			left: 200,
-			top: (exports.canvas.height * 0.15) - 85
+			top: (exports.canvas.height * 0.15) - 85,
+	  		selectable: false
 		});
-		exports.bubba.set("selectable", false);
 		exports.bubba.updatePosition = function() {
 			var moveSpeed = 10;
 			if (exports.gameBall.left < (exports.bubba.left - moveSpeed)) {
@@ -184,17 +153,40 @@ function PingPongGame(options) {
 				exports.bubba.left = rightEdge - exports.bubba.width;
 			}
 		};
-		exports.canvas.add(exports.bubba);
+		
 
+		exports.canvas.on("mouse:move", function(args) {
+			exports.player.left = args.e.clientX - exports.player.width / 2;
+			exports.player.top = args.e.clientY - exports.player.height / 2;
+
+			if (exports.player.top < playerBounds) {
+				exports.player.top = playerBounds;
+			}
+
+			// Ball should track Player when not in Play
+			if (!exports.gameBall.isInPlay) {
+				exports.gameBall.left = exports.player.left + exports.player.width / 2;
+				exports.gameBall.top = exports.player.top;
+			}
+		});
 		
 
 		exports.canvas.on("mouse:down", function(args) {
 			exports.gameBall.isInPlay = true;
 		});
 
-		exports.canvas.add(exports.gameBall);
+		
 
-		var theScoreBoard = new scoreBoard({ canvasWidth: exports.canvas.width });
+		
+
+
+		exports.canvas.add(new PingPongTable({
+			width: exports.canvas.width,
+			height: exports.canvas.height
+		}));
+		exports.canvas.add(exports.bubba);
+		exports.canvas.add(exports.gameBall);
+		exports.canvas.add(exports.player);		
 		exports.canvas.add(theScoreBoard);
 	};
 
@@ -211,7 +203,7 @@ function PingPongGame(options) {
 	(function init(options) {
 		exports.canvas = new fabric.Canvas("game_canvas");
 		exports.canvas.selection = false;
-		exports.canvas.defaultCursor = "none";
+		//exports.canvas.defaultCursor = "none";
 		exports.canvas.backgroundColor = "gray";
 		exports.canvas.setDimensions({
 			width: options.width,

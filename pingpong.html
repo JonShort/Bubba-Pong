@@ -5,26 +5,23 @@
 			padding: 0;
 			margin: 0;
 		}
+
+		.canvas-container {
+			margin: 0 auto;
+		}
 	</style>
 </head>
 <body>
 	<canvas id="game_canvas"></canvas>
-	<script src="fabric.min.js"></script>
+	<script src="lib/fabric.min.js"></script>
 	<script src="assetManager.js"></script>
 	<script src="pingpong.js"></script>
 	<script>
 		var game = new PingPongGame({
-			width: document.documentElement.clientWidth,
-			height: document.documentElement.clientHeight
+			width: 600,
+			height: 550
 		});
 		game.start();
-
-		window.onresize = function(event) {
-			game.resizeCanvas({
-				width: document.documentElement.clientWidth,
-				height: document.documentElement.clientHeight
-			});
-		};
 	</script>
 </body>
 </html>

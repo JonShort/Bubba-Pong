@@ -1,10 +1,10 @@
-function AssetManager() {
+function AssetManager(root) {
 	var exports = this;
 
 	exports.assets = [];
 
 	exports.loadAsset = function(url, callback) {
-		fabric.Image.fromURL(url, function(asset) {
+		fabric.Image.fromURL(root + url, function(asset) {
 			exports.assets.push({
 				url: url,
 				asset: asset

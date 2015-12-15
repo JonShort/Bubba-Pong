@@ -1,7 +1,74 @@
 function PingPongGame(options) {
 	var exports = this;
 
-	var assetManager = new AssetManager();
+	var assetManager = new AssetManager("assets/");
+
+	var scoreBoard = fabric.util.createClass(fabric.Rect, {
+		initialize: function(args) {
+			var _width = 200;
+			var _height = 50;
+			this.callSuper("initialize", {
+				left: args.canvasWidth - _width,
+		  		top: 0,
+		  		width: _width,
+		  		height: _height
+			});
+
+			this.set("selectable", false);
+			this.setColor("brown");
+		}
+	});
+
+	var table = fabric.util.createClass(fabric.Group, {
+		initialize: function(args) {
+			this.callSuper("initialize");
+
+			var tableTop = args.canvasHeight * 0.15;
+			var tableBottom = args.canvasHeight * 0.9;
+			var tableLeft = args.canvasWidth * 0.1;
+			var tableRight = args.canvasWidth * 0.9;
+
+			var tableSkew = args.canvasWidth * 0.1;
+
+			this.add(new fabric.Polygon([
+				{ x: tableLeft + tableSkew, y: tableTop },
+				{ x: tableRight - tableSkew, y: tableTop },
+				{ x: tableRight, y: tableBottom },
+				{ x: tableLeft, y: tableBottom}],
+				{
+					fill: "#234F4A",
+					stroke: "white",
+					strokeWidth: 5,
+					shadow: {
+						color: "black",
+						offsetX: 0,
+			        	offsetY: 40,
+			        	blur: 20
+					}
+				}
+			));
+
+			this.add(new fabric.Polygon([
+				{ x: tableLeft + (tableSkew / 1.9), y: (tableTop + tableBottom) / 2.1 },
+				{ x: tableRight - (tableSkew / 1.9), y: (tableTop + tableBottom) / 2.1 }],
+				{
+					stroke: "white",
+					strokeWidth: 5
+				}
+			));
+
+			this.add(new fabric.Polygon([
+				{ x: (tableLeft + tableRight) / 2, y: tableTop },
+				{ x: (tableLeft + tableRight) / 2, y: tableBottom }],
+				{
+					stroke: "white",
+					strokeWidth: 5
+				}
+			));
+
+			this.set("selectable", false);
+		}
+	});
 
 	var bat = fabric.util.createClass(fabric.Rect, {
 		initialize: function(left, top) {
@@ -32,11 +99,17 @@ function PingPongGame(options) {
 			this.hitProcessed = false;
 
 			this.set("selectable", false);
-			this.setColor("red");
+			this.setColor("orange");
 			this.isInPlay = false;
 
 			this.deltaX = 1;
 			this.deltaY = 5;
+
+			this.setShadow({
+				color: "rgba(0, 0, 0, 0.7)",
+				offsetY: 5,
+	        	blur: 20
+			});
 		},
 
 		getRadius: function(yPosition, maxYPosition) {
@@ -97,77 +170,13 @@ function PingPongGame(options) {
 		});
 	};
 
-	var getBubba = function() {
-		
-	};
-
-	var setupTable = function() {
-		var tableTop = exports.canvas.height * 0.15;
-		var tableBottom = exports.canvas.height * 0.9;
-		var tableLeft = exports.canvas.width * 0.1;
-		var tableRight = exports.canvas.width * 0.9;
-
-		var tableSkew = exports.canvas.width * 0.1;
-		var table = new fabric.Polygon([
-			{
-				x: tableLeft + tableSkew,
-				y: tableTop
-			}, {
-				x: tableRight - tableSkew,
-				y: tableTop
-			}, {
-				x: tableRight,
-				y: tableBottom
-			}, {
-				x: tableLeft,
-				y: tableBottom
-			}
-		], {
-			fill: "#234F4A",
-			stroke: "white",
-			strokeWidth: 5
-		});
-		table.setShadow({
-			color: "black",
-			offsetX: 0,
-        	offsetY: 40,
-        	blur: 20
-		});
-
-		var lineHorizontal = new fabric.Polygon([
-			{
-				x: tableLeft + (tableSkew / 1.9),
-				y: (tableTop + tableBottom) / 2.1
-			}, {
-				x: tableRight - (tableSkew / 1.9),
-				y: (tableTop + tableBottom) / 2.1
-			}
-		], {
-			stroke: "white",
-			strokeWidth: 5
-		});
-
-		var lineVertical = new fabric.Polygon([
-			{
-				x: (tableLeft + tableRight) / 2,
-				y: tableTop
-			}, {
-				x: (tableLeft + tableRight) / 2,
-				y: tableBottom
-			}
-		], {
-			stroke: "white",
-			strokeWidth: 5
-		});
-
-		var tableGroup = new fabric.Group([table, lineVertical, lineHorizontal]);
-		tableGroup.set("selectable", false);
-
-		exports.canvas.add(tableGroup);
-	};
-
 	var _setInitialState = function() {
-		setupTable();
+
+		var pingPongTable = new table({
+			canvasWidth: exports.canvas.width,
+			canvasHeight: exports.canvas.height
+		});
+		exports.canvas.add(pingPongTable);
 
 		var playerBounds = exports.canvas.height * 0.75;
 
@@ -235,42 +244,14 @@ function PingPongGame(options) {
 		});
 
 		exports.canvas.add(exports.gameBall);
+
+		var theScoreBoard = new scoreBoard({ canvasWidth: exports.canvas.width });
+		exports.canvas.add(theScoreBoard);
 	};
-
-	exports.resizeCanvas = function(options) {
-		exports.canvas.setDimensions({
-			width: options.width,
-			height: options.height
-		});
-	};
-
-	// var _loadedAssets = [];
-	// var _loadAssets = function(assetsNamesToLoad, successCallback) {
-	// 	assetsNamesToLoad.forEach(function(assetName) {
-	// 		fabric.Image.fromURL(assetName, function(asset) {
-	// 			_loadedAssets.push({
-	// 				assetName: assetName,
-	// 				asset: asset
-	// 			});
-
-	// 			if (_loadedAssets.length === assetsNamesToLoad.length) {
-	// 				successCallback();
-	// 			}
-	// 		});
-	// 	});
-	// };
-
-	// var getAsset = function(assetName) {
-	// 	for (var i = 0; i < _loadedAssets.length; i++) {
-	// 		if (_loadedAssets[i].assetName === assetName) {
-	// 			return _loadedAssets[i].asset;
-	// 		}
-	// 	}
-	// 	throw "Asset " + assetName + " not loaded.";
-	// };
 
 	exports.start = function() {
-		assetManager.loadAssets(["bubba-with-bat.png", "bat.png"], function() {
+		var assetsToLoad = ["bubba-with-bat.png", "bat.png"];
+		assetManager.loadAssets(assetsToLoad, function() {
 			requestAnimationFrame(function() {
 				_setInitialState();
 				_run();

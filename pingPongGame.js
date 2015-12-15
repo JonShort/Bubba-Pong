@@ -19,56 +19,7 @@ function PingPongGame(options) {
 		}
 	});
 
-	var pingPongTable = fabric.util.createClass(fabric.Group, {
-		initialize: function(args) {
-			this.callSuper("initialize");
-
-			var tableTop = args.height * 0.15;
-			var tableBottom = args.height * 0.9;
-			var tableLeft = args.width * 0.1;
-			var tableRight = args.width * 0.9;
-
-			var tableSkew = args.width * 0.1;
-
-			this.add(new fabric.Polygon([
-				{ x: tableLeft + tableSkew, y: tableTop },
-				{ x: tableRight - tableSkew, y: tableTop },
-				{ x: tableRight, y: tableBottom },
-				{ x: tableLeft, y: tableBottom}],
-				{
-					fill: "#234F4A",
-					stroke: "white",
-					strokeWidth: 5,
-					shadow: {
-						color: "black",
-						offsetX: 0,
-			        	offsetY: 40,
-			        	blur: 20
-					}
-				}
-			));
-
-			this.add(new fabric.Polygon([
-				{ x: tableLeft + (tableSkew / 1.9), y: (tableTop + tableBottom) / 2.1 },
-				{ x: tableRight - (tableSkew / 1.9), y: (tableTop + tableBottom) / 2.1 }],
-				{
-					stroke: "white",
-					strokeWidth: 5
-				}
-			));
-
-			this.add(new fabric.Polygon([
-				{ x: (tableLeft + tableRight) / 2, y: tableTop },
-				{ x: (tableLeft + tableRight) / 2, y: tableBottom }],
-				{
-					stroke: "white",
-					strokeWidth: 5
-				}
-			));
-
-			this.set("selectable", false);
-		}
-	});
+	
 
 	var bat = fabric.util.createClass(fabric.Rect, {
 		initialize: function(left, top) {

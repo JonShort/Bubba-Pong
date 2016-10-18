@@ -53,15 +53,15 @@ function PingPongGame(options) {
 
 		updatePosition: function(maxLeft, maxTop, player) {
 			if (player.hitTargetIntersectsWithObject(exports.gameBall)) {
-			//if (exports.gameBall.intersectsWithObject(player.hitTarget)) {
-				if (!this.hitProcessed) {
-					exports.gameBall.invertDirection();
-				}
+				//if (exports.gameBall.intersectsWithObject(player.hitTarget)) {
+			if (!this.hitProcessed) {
+				exports.gameBall.invertDirection();
+			}
 				this.hitProcessed = true;
 			} else {
 				this.hitProcessed = false;
 			}
-
+			
 			if (this.left < 0 || this.left + this.radius > maxLeft) {
 				this.deltaX = -this.deltaX;
 			}
@@ -104,32 +104,18 @@ function PingPongGame(options) {
 	};
 
 	var _setInitialState = function() {
-
-
 		var theScoreBoard = new scoreBoard({ canvasWidth: exports.canvas.width });
-
-		
-		
-
 		var playerBounds = exports.canvas.height * 0.75;
-
 		var pingPongBatSprite = assetManager.getLoadedAsset("bat.png");
+
 		exports.player = new Player(pingPongBatSprite, {
 			initialLeft: exports.canvas.width / 2,
 			initialTop: playerBounds
 		});
 
 		exports.gameBall = new ball(exports.player.left, exports.player.top, exports.canvas.width, exports.canvas.height);
-
 		
-
-
-		
-
-		
-		
-	
-		exports.bubba = assetManager.getLoadedAsset("bubba-with-bat.png");
+		exports.bubba = assetManager.getLoadedAsset("bubba-with-bat.svg");
 		exports.bubba.set({
 			left: 200,
 			top: (exports.canvas.height * 0.15) - 85,
@@ -154,9 +140,12 @@ function PingPongGame(options) {
 			}
 		};
 		
-
 		exports.canvas.on("mouse:move", function(args) {
-			exports.player.left = args.e.clientX - exports.player.width / 2;
+			if (exports.canvas.width < window.innerWidth) {
+				exports.player.left = args.e.clientX - (((window.innerWidth - exports.canvas.width) / 2) + (exports.player.width / 2));
+			} else {
+				exports.player.left = args.e.clientX - (exports.player.width / 2);
+			}
 			exports.player.top = args.e.clientY - exports.player.height / 2;
 
 			if (exports.player.top < playerBounds) {
@@ -191,7 +180,7 @@ function PingPongGame(options) {
 	};
 
 	exports.start = function() {
-		var assetsToLoad = ["bubba-with-bat.png", "bat.png"];
+		var assetsToLoad = ["bubba-with-bat.svg", "bat.png"];
 		assetManager.loadAssets(assetsToLoad, function() {
 			requestAnimationFrame(function() {
 				_setInitialState();
